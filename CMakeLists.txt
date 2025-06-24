@@ -6,6 +6,8 @@ find_package(nlohmann_json CONFIG REQUIRED)
 
 add_executable(ReceiveClient main.cpp
         Movie.h
-        Movie.cpp)
+        Movie.cpp
+        OMDbClient.h
+        OMDbClient.cpp)
 
 target_link_libraries(ReceiveClient PRIVATE nlohmann_json::nlohmann_json)

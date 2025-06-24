@@ -4,10 +4,13 @@
 
 #include "Movie.h"
 #include <nlohmann/json.hpp>
+
+#include "OMDbClient.h"
 using json = nlohmann::json;
 
 
-Movie::Movie(): title(" "), year(" "), genre(" "), release(" ")
+Movie::Movie()
+    : title(" "), year(" "), genre(" "), release(" ")
 {
-    //nothning here
-}
+    //nothing here
+};
