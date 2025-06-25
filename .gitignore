@@ -1,0 +1,6 @@
+apikey.txt
+apikey.txt
+cmake-build-*/
+*.out
+*.o
+*.exe
