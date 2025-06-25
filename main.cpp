@@ -5,7 +5,10 @@
 
 int main()
 {
-    OMDbClient client;
-    return client.FetchMovieRatings();
+    Movie movie;
+    movie.getTitle();
+    // OMDbClient client;
+    // return client.FetchMovieRatings();
+
 return 0;
 }

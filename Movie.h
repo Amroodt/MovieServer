@@ -1,11 +1,15 @@
 #pragma once
 #include <string>
+#include "OMDbClient.h"
 
 
 class Movie
 {
 private:
-    std::string title, year, release, genre;
+    std::string title, year, release, genre, ratings, f_ratings, comments, top_ten_list;
+    OMDbClient client;
+    int fetchRating();
+
 public:
     Movie(); //Constructor Declaration
 

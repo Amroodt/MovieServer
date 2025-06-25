@@ -17,7 +17,7 @@
 
 #define PORT "80"
 #define HOST "www.omdbapi.com"
-    //#define PATH "/?i=tt3896198&apikey=4cfe3aa7"
+
 #define BUFFER_SIZE 4096
 
 
