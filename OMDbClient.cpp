@@ -22,8 +22,9 @@
 
 
 OMDbClient::OMDbClient()
+    : jsonBody("")
 {
-
+// Nothing here yet
 };
 
 int OMDbClient::FetchMovieRatings(void)
@@ -116,12 +117,30 @@ int OMDbClient::FetchMovieRatings(void)
     }
 
     printf("=== Response ===\n");
+    std::string response;
 
     // recv function
-    while ((bytes_received = recv(sockfd, buffer, BUFFER_SIZE - 1, 0)) > 0) {
+    while ((bytes_received = recv(sockfd, buffer, BUFFER_SIZE - 1, 0)) > 0)
+    {
         buffer[bytes_received] = '\0'; // Null-terminate
-        printf("%s", buffer);
+        //printf("%s", buffer); // Used to print out Headers
+        response += buffer; //Append string received in chunks
+        size_t pos = response.find("\r\n\r\n");
+        if (pos != std::string::npos)
+        {
+            jsonBody = response.substr(pos+4);
+        }
+        else
+        {
+            std::cout << "Could not find and skip HTTPS headers";
+        }
+        std::cout << std::endl;
+        std::cout << jsonBody << std::endl;
+
+
+
     }
+
 
     if (bytes_received == -1) {
         perror("recv");
@@ -131,3 +150,7 @@ int OMDbClient::FetchMovieRatings(void)
 
     return 0;
     }
+std::string OMDbClient::get_jsonBody() const
+{
+    return jsonBody;
+}
