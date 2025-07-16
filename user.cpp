@@ -1,0 +1,72 @@
+//
+// Created by Joel Amroodt on 2025/07/10.
+//
+
+#include "user.h"
+
+user::user()
+    : username("Change to your name."),
+      serverID("Amroodt"),
+      passWordHash("1234")
+
+{
+
+}
+user::~user()
+{
+
+}
+
+void user::setName(std::string name)
+{
+
+}
+
+std::string user::getName()
+{
+}
+
+std::string user::getPassword()
+{
+    return passWordHash;
+}
+
+void user::setPasswordHash(std::string password)
+{
+}
+
+bool user::ValidatePassword(std::string password)
+{
+}
+
+void user::setRole()
+{
+}
+
+std::string user::getRole() const
+{
+}
+
+void user::SaveUser(pqxx::connection& c,std::string name, std::string password )
+{
+    pqxx::work txn{c};
+    txn.exec("INSERT INTO users (username, password_hash) VALUES (" + txn.quote(name) + ", " + txn.quote(password) + ")");
+    txn.commit();
+}
+
+std::string user::getUser(pqxx::connection& c, std::string username) const
+{
+    pqxx::work txn{c};
+    pqxx::result r = txn.exec(
+        "SELECT id, username FROM users WHERE username = " + txn.quote(username)
+    );
+    txn.commit();
+    int id = r[0][0].as<int>();
+    std::string uname = r[0][1].as<std::string>();
+
+    return "ID: " + std::to_string(id) + ", Username: " + uname;
+}
+
+std::string user::getID() const
+{
+}
