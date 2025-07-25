@@ -19,7 +19,11 @@ add_executable(ReceiveClient main.cpp
         OMDbClient.h
         OMDbClient.cpp
         user.cpp
-        user.h)
+        user.h
+        Review.cpp
+        Review.h
+        ServerSocket.cpp
+        ServerSocket.h)
 
 target_link_libraries(ReceiveClient PRIVATE nlohmann_json::nlohmann_json
         ${PQXX_LIBRARIES})
