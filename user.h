@@ -24,7 +24,10 @@ public:
     std::string getRole() const;
     void SaveUser(pqxx::connection& c,std::string name, std::string password);
     std::string getUser(pqxx::connection& c, std::string username) const;
-    std::string getID() const;
+    int getID(pqxx::connection& c, std::string username) const;
+
+    void AddUser(pqxx::connection& c, std::string username, std::string password);
+
 
 
 private:

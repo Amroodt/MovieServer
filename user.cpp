@@ -67,6 +67,26 @@ std::string user::getUser(pqxx::connection& c, std::string username) const
     return "ID: " + std::to_string(id) + ", Username: " + uname;
 }
 
-std::string user::getID() const
+int user::getID(pqxx::connection& c, std::string username) const
 {
+    pqxx::work txn{c};
+    pqxx::result r = txn.exec("SELECT id FROM users WHERE username = " + txn.quote(username));
+    txn.commit();
+    int const id = r[0][0].as<int>();
+    return id;
+}
+
+void user::AddUser(pqxx::connection &c, std::string username, std::string password)
+{
+    // setup a user
+     user* toAdd = new user();
+    std::string name = username;
+    password = toAdd->getPassword();
+
+    std::cout <<" Connected to " << c.dbname() << "\n";
+
+
+    toAdd->SaveUser(c, name, password);
+
+    std::cout << name << "created \n";
 }
