@@ -29,6 +29,11 @@ public:
     ServerSocket(pqxx::connection& c);
     ~ServerSocket();
 
+    void run();
+    void handleConnection();
+    void sendResponse(int new_fd, const std::string &status, const std::string &contentType,
+    const std::string &body);
+
 
 
 private:
@@ -36,6 +41,9 @@ private:
     // get sockaddrr, IPv4 or IPv6
     void *get_in_addr(struct sockaddr *sa);
 
+    std::string recvRequest(int client_fd);
+
+    pqxx::connection& db_connection;
     int sockfd, new_fd;
     struct addrinfo hints, *servinfo, *p;
     struct sockaddr_storage their_addr;

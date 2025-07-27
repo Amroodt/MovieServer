@@ -7,9 +7,12 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <string>
 
 ServerSocket::ServerSocket(pqxx::connection &c)
-: servinfo (nullptr)
+    : servinfo (nullptr),
+      db_connection(c)
+
 {
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
@@ -68,6 +71,16 @@ ServerSocket::ServerSocket(pqxx::connection &c)
     }
     printf("server: waiting for connection...\n");
 
+
+
+    }
+
+ServerSocket::~ServerSocket()
+{
+}
+
+void ServerSocket::run()
+{
     while(1)
     {
         sin_size = sizeof their_addr;
@@ -84,58 +97,81 @@ ServerSocket::ServerSocket(pqxx::connection &c)
         if (!fork())
         {
             close(sockfd);
-            // if (send(new_fd, "Hello World!\n", 13, 0) == -1)
-            //     perror("send");
-            // send(new_fd, http_response, strlen(http_response), 0);
-            // close(new_fd);
-            char request_buffer[4096] = {0};
-            ssize_t received = recv(new_fd, request_buffer, sizeof(request_buffer) - 1, 0);
-
-            std::string request_line(request_buffer); // convert to C++ string
-            size_t path_start = request_line.find("GET ") + 4;
-            size_t path_end = request_line.find(" ", path_start);
-            std::string path = request_line.substr(path_start, path_end - path_start);
-
-            if (received > 0) {
-                printf("Received HTTP request:\n%s\n", request_buffer);
-            }
-
-            if (path.find("/userid?name=") == 0) {
-                std::string username = path.substr(strlen("/userid?name="));
-
-                std::string searchUser = user.getUser(c,username); //Function Call to search User
-
-
-                std::ostringstream body;
-                body << "{\"user_id\": " << searchUser << "}";
-
-                std::ostringstream response;
-                response << "HTTP/1.1 200 OK\r\n"
-                         << "Content-Type: application/json\r\n"
-                         << "Content-Length: " << body.str().length() << "\r\n"
-                         << "Connection: close\r\n"
-                         << "\r\n"
-                         << body.str();
-
-                std::string res = response.str();
-                send(new_fd, res.c_str(), res.size(), 0);
-
-                ssize_t sent = send(new_fd, res.c_str(), strlen(res.c_str()), 0);
-                if (sent == -1)
-                    perror("send");
-                close(new_fd);
-                exit(0);
-            }
+            handleConnection();
             close(new_fd);
             exit(0);
         }
+        close(new_fd);
+    }
 
+}
+
+void ServerSocket::handleConnection()
+{
+    std::string path = recvRequest(new_fd);
+
+    if (path.find("/userid?name=") == 0)
+    {
+        std::string searchUser = user.UserSerializer(path, db_connection, user);
+        std::string body;
+        body = "{\"user_id\": " + searchUser + "}";
+
+        std::string status = "200 OK";
+        std:: string content_type = "application/json";
+
+        sendResponse(new_fd, status, content_type, body);
+        close(new_fd);
     }
 }
-ServerSocket::~ServerSocket()
+
+void ServerSocket::sendResponse(int new_fd, const std::string &status, const std::string &contentType,
+    const std::string &body)
 {
+    std::ostringstream response;
+    response << "HTTP/1.1 " << status <<"\r\n"
+             << "Content-Type: " << contentType << "\r\n"
+             << "Content-Length: " << body.size() << "\r\n"
+             << "Connection: close\r\n"
+             << "\r\n"
+             << body;
+
+    std::string res = response.str();
+    //send(new_fd, res.c_str(), res.size(), 0);
+
+    ssize_t sent = send(new_fd, res.c_str(), res.size(), 0);
+    if (sent == -1)
+        perror("send");
 }
 
+
+std::string ServerSocket::recvRequest(int new_fd)
+{
+    char request_buffer[4096] = {0};
+    ssize_t received = recv(new_fd, request_buffer, sizeof(request_buffer) - 1, 0);
+
+
+
+    if (received < 0)
+    {
+        printf( request_buffer);
+        perror("recv failed or connection failed" );
+        return "";
+    }
+    std::string request_line(request_buffer);
+    size_t path_start = request_line.find("GET ") + 4;
+    size_t path_end = request_line.find(" ", path_start);
+    std::string path = request_line.substr(path_start, path_end - path_start);
+
+    if (path_start == std::string::npos || path_end == std::string::npos)
+    {
+        fprintf(stderr, "Server: Malformed request\n");
+        return "";
+    }
+
+    printf("Received HTTP request:\n%s\n", request_buffer);
+    return request_line.substr(path_start, path_end - path_start);
+
+}
 
 void ServerSocket::sigchild_handler(int s)
 {

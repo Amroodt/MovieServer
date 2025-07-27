@@ -61,8 +61,14 @@ std::string user::getUser(pqxx::connection& c, std::string username) const
         "SELECT id, username FROM users WHERE username = " + txn.quote(username)
     );
     txn.commit();
+
+    if(r.empty())
+        return "User not found";
+
     int id = r[0][0].as<int>();
     std::string uname = r[0][1].as<std::string>();
+
+
 
     return "ID: " + std::to_string(id) + ", Username: " + uname;
 }
@@ -89,4 +95,11 @@ void user::AddUser(pqxx::connection &c, std::string username, std::string passwo
     toAdd->SaveUser(c, name, password);
 
     std::cout << name << "created \n";
+}
+
+std::string user::UserSerializer(std::string& path, pqxx::connection &db_connection, const user& user)
+{
+    std::string username = path.substr(strlen("/userid?name="));
+    std::string searchUser = user.getUser(db_connection,username);
+    return searchUser;
 }
