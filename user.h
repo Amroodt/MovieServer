@@ -28,6 +28,8 @@ public:
 
     void AddUser(pqxx::connection& c, std::string username, std::string password);
 
+    std::string UserSerializer (std::string& path,  pqxx::connection &db_connection, const user& user);
+
 
 
 private:

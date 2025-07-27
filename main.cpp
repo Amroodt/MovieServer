@@ -11,7 +11,9 @@
 int main()
 {
     //Database connection
-     pqxx::connection c("dbname=MovieApp");
+    pqxx::connection c("dbname=MovieApp");
+    ServerSocket server(c);
+    server.run();
     //Add user
     // user toAdd;
     // toAdd.AddUser(c, "Ava", " ");
@@ -82,7 +84,7 @@ int main()
     // Review* review = new Review(c,title, ID);
 
 
-    ServerSocket server(c);
+
 
 
 
